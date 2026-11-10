@@ -1,0 +1,4 @@
+psd-tools[composite]==1.26.0
+clipparse==0.2.0
+Pillow==12.3.0
+pyinstaller>=6.10,<7
