@@ -1,0 +1,51 @@
+name: Build Windows 10 x64
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app.py"
+      - "export_core.py"
+      - "storyboard.py"
+      - "media_catalog.py"
+      - "requirements-windows.txt"
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: requirements-windows.txt
+      - name: Install and test
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-windows.txt
+          foreach ($test in @('selftest.py','integration_test.py','media_catalog_test.py','studio_link_test.py','workflow_test.py','workflow10_test.py')) {
+            python $test
+            if ($LASTEXITCODE -ne 0) { throw "Failed: $test" }
+          }
+      - name: Package FolderExporter.exe
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --windowed --onefile --name FolderExporter --icon FolderExporter.ico --add-data "folder.png;." --add-data "WORKFLOW_MANUAL.md;." --collect-all psd_tools --collect-all clipparse app.py
+          if ($LASTEXITCODE -ne 0) { throw 'PyInstaller failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FolderExporter-Windows-x64
+          path: dist/FolderExporter.exe
+          if-no-files-found: error
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/FolderExporter.exe
+          generate_release_notes: true
