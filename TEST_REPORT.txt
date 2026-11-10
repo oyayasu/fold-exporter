@@ -1,0 +1,27 @@
+# Verification — coordinated workflow patch
+
+Release: Storyboard Studio 0.9.0 (ORIGINAL app), FolderExporter 1.10.0, Subtitler 0.6.0.
+
+| Check | Result |
+| --- | --- |
+| Storyboard Studio core model/regression tests | 114 passed |
+| Storyboard Studio actual native filesystem modules | 16 passed |
+| Subtitler core model/export/alignment tests | 41 passed |
+| Subtitler actual native storage/folder/timing modules | 10 passed |
+| WhisperX worker fixture tests | 7 passed |
+| FolderExporter integration/catalog/Studio Link/workflow tests | 46 passed |
+| FolderExporter source/render safety self-checks | Passed |
+| Real FolderExporter index → Storyboard Studio parser → XML | Passed; shared sources/components retained, V1 reserved |
+| Simulated Retina cursor targeting + external insertion + card-number geometry | Passed |
+| Subtitler full editor/export/settings/playback/browser flows | Passed |
+| Unrelated import/private saving + recent reopen + stable linked retranscription | Passed |
+| Original-app integration UI (gated import, scissors, XML, Perform, Completion, settings) | Passed after updating mocks for the new discovery command/XML route |
+| Complete native Rust syntax, including command/menu bindings | 16 source files parsed |
+| Native mono conversion | Actual FFmpeg average of left/right verified; cache reuse and untouched original verified |
+| Frontend source/import/config/version checks | Passed |
+
+The 234 named core/native/worker/Python tests are supplemented by the UI, composition, cross-app and source checks above.
+
+Limits: no complete macOS/Windows GUI application build, native Finder event delivery, native desktop menu interaction or actual Resolve/Premiere import was executed in this Linux environment. Native filesystem modules are compiled from their real source with GUI/runtime stubs; this is not a complete Tauri GUI build. Browser workflows use native API mocks, including cursor geometry. A real Whisper/WhisperX model was not run; worker/model behavior was tested with fixtures. The optional real-portrait UI branch requires PORTRAIT_PATH and was not part of this run. The existing sheet-edge detector fix remains unchanged.
+
+First target-machine checks: build the three apps, retranscribe the linked Nora recording, test Finder drops on later cards, test a manual cleanup replacing a rough export, and left-extend stills after importing XML. Stereo can appear as linked channel clips depending on the editor. Mono creates a reusable derived mix; original audio is kept.
